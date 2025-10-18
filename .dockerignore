@@ -1,0 +1,13 @@
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+.git
+.gitignore
+.venv
+venv
+env
+*.log
+webapp.zip
+functionapp.zip
+tmp_appsettings.json

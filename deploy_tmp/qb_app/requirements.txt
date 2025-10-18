@@ -1,0 +1,6 @@
+Flask
+requests
+pyodbc
+python-dotenv
+PyJWT
+bcrypt

@@ -1,0 +1,3 @@
+from qb_app.qb_callback_app import app as application
+
+print("✅ Flask app loaded successfully")
