@@ -1,8 +1,8 @@
 import datetime as dt
 from functools import wraps
-import bcrypt
 import jwt
 from flask import Blueprint, request, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from qb_app.db import get_connection, fetchone_dict
 from qb_app import app
@@ -196,7 +196,8 @@ def register_user():
     if not company_name or not email or not password:
         return jsonify({"error": "company_name, email, and password are required"}), 400
 
-    pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    # Hash the password for storage
+    pw_hash = generate_password_hash(password)
 
     try:
         conn = get_connection()
@@ -257,7 +258,20 @@ def login_user():
             conn.close()
             print("Invalid credentials: no password hash")
             return jsonify({"error": "Invalid credentials"}), 401
-        if not bcrypt.checkpw(password.encode("utf-8"), str(pw_hash).encode("utf-8")):
+        # Validate using werkzeug's password hash checker (new users)
+        ok = False
+        try:
+            ok = check_password_hash(str(pw_hash), password)
+        except Exception:
+            ok = False
+        # Fallback to bcrypt for legacy users
+        if not ok:
+            try:
+                import bcrypt  # lazy import to avoid hard dependency in envs without it
+                ok = bcrypt.checkpw(password.encode("utf-8"), str(pw_hash).encode("utf-8"))
+            except Exception:
+                ok = False
+        if not ok:
             conn.close()
             print("Invalid credentials: bad password")
             return jsonify({"error": "Invalid credentials"}), 401
@@ -372,3 +386,9 @@ def me():
             "company_name": user["company_name"],
         }
     )
+
+# Optional route aliases to support legacy frontend paths
+@app.post("/api/auth/login")
+@app.post("/api/login")
+def login_user_alias():
+    return login_user()
