@@ -117,3 +117,4 @@ jobs:
             echo "- Web App: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net";
             echo "- Resource Group: $AZURE_RESOURCE_GROUP";
           } >> "$GITHUB_STEP_SUMMARY"
+
