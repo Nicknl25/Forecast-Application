@@ -31,4 +31,7 @@ COPY . /app
 EXPOSE 8000
 
 # Default command: run Flask app via Gunicorn
-CMD ["gunicorn", "--bind=0.0.0.0:8000", "--timeout=600", "--access-logfile", "-", "--error-logfile", "-", "--log-level", "info", "--capture-output", "wsgi:app"]
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+CMD ["/start.sh"]
+
