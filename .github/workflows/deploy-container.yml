@@ -118,3 +118,5 @@ jobs:
             echo "- Resource Group: $AZURE_RESOURCE_GROUP";
           } >> "$GITHUB_STEP_SUMMARY"
 
+
+
