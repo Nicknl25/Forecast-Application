@@ -155,3 +155,4 @@ To enable:
 
 The workflow summary includes the “Deployed image SHA.” You can also view deployment status via the badge near the top of this README.
 <!-- chore: re-run deploy after adding AZURE_CREDENTIALS -->
+<!-- chore: re-run deploy -->
