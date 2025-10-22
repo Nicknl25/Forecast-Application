@@ -82,7 +82,7 @@ jobs:
             --name $AZURE_WEBAPP_NAME \
             --container-image-name ${{ steps.vars.outputs.IMAGE_SHA }}
 
-      - name: Fallback: ensure ACR admin and apply pull credentials
+      - name: "Fallback: ensure ACR admin and apply pull credentials"
         run: |
           set -e
           # If MI doesn't have AcrPull yet, ensure ACR admin and set creds
