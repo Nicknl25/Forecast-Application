@@ -12,11 +12,11 @@ except Exception as e:
 PY
 
 export PYTHONUNBUFFERED=1
-echo "[entrypoint] reached before exec at $(date -u +%FT%TZ)"\nwhich gunicorn || true\necho "[entrypoint] which python: $(which python || true)"\nexec gunicorn \
+echo "[entrypoint] reached before exec at $(date -u +%FT%TZ)"\nwhich gunicorn || true\necho "[entrypoint] which python: $(which python || true)"\nexec sh -c 'gunicorn \
   --bind=0.0.0.0:8000 \
   --timeout=600 \
   --access-logfile - \
   --error-logfile - \
   --log-level info \
   --capture-output \
-  wsgi:app
+  wsgi:app 2>&1 | tee -a /home/LogFiles/gunicorn.log'
