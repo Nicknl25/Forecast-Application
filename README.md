@@ -154,3 +154,4 @@ To enable:
 - Optionally add `ACR_USERNAME` and `ACR_PASSWORD` if you prefer explicit pull credentials; otherwise the workflow enables ACR admin and configures pull automatically.
 
 The workflow summary includes the “Deployed image SHA.” You can also view deployment status via the badge near the top of this README.
+<!-- chore: re-run deploy after adding AZURE_CREDENTIALS -->
