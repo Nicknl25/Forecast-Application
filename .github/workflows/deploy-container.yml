@@ -53,7 +53,11 @@ jobs:
             --setting-names DOCKER_REGISTRY_SERVER_USERNAME DOCKER_REGISTRY_SERVER_PASSWORD || true
 
       - name: Login to Azure Container Registry
-        run: az acr login --name $ACR_NAME
+        run: |
+          set -e
+          # Acquire ACR access token via AAD and perform docker login
+          TOKEN=$(az acr login --name $ACR_NAME --expose-token --output tsv --query accessToken)
+          echo "$TOKEN" | docker login $ACR_LOGIN_SERVER -u 00000000-0000-0000-0000-000000000000 --password-stdin
 
       - name: Set image tags
         id: vars
