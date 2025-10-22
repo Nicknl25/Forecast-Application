@@ -2,7 +2,9 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Signup from './pages/Signup.jsx'
 import Login from './pages/Login.jsx'
-import Dashboard from './pages/Dashboard.jsx'
+import UserDashboard from './pages/UserDashboard.jsx'
+import TeamManagement from './pages/TeamManagement.jsx'
+import AuditLog from './pages/AuditLog.jsx'
 import Home from './pages/Home.jsx'
 import Pricing from './pages/Pricing.jsx'
 import About from './pages/About.jsx'
@@ -31,10 +33,26 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route
-          path="/dashboard"
+          path="/user-dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team-management"
+          element={
+            <ProtectedRoute>
+              <TeamManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/audit-log"
+          element={
+            <ProtectedRoute>
+              <AuditLog />
             </ProtectedRoute>
           }
         />

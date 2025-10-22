@@ -14,7 +14,7 @@ export default function Home() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/integrations" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Connect QuickBooks</Link>
-            <Link to="/dashboard" className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200">See Demo</Link>
+            <Link to="/user-dashboard" className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200">See Demo</Link>
             <Link to="/signup" className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600">Start Free Trial</Link>
           </div>
         </motion.div>
@@ -45,4 +45,3 @@ export default function Home() {
     </div>
   )
 }
-

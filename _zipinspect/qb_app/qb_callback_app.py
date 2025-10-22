@@ -9,17 +9,6 @@ from qb_app.db import get_connection
 from qb_app.job_runner import submit_onboarding
 import sys, logging
 from qb_app import app
-# Ensure all web routes and background scheduler are registered even when
-# the app entrypoint is qb_app.qb_callback_app:app (Gunicorn startup override).
-try:
-    import qb_app.web_routes  # noqa: F401
-    import qb_app.scheduler   # noqa: F401  # starts APScheduler on import
-except Exception as _e:
-    # Do not crash app if optional imports fail; log for diagnostics
-    try:
-        print(f"[scheduler] import warning: {_e}")
-    except Exception:
-        pass
 
 # Load environment variables
 load_dotenv()

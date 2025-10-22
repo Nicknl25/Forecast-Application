@@ -1,0 +1,96 @@
+name: Deploy Container to Azure Web App
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_WEBAPP_NAME: finance-webapp-test
+  AZURE_RESOURCE_GROUP: finance-rg
+  ACR_NAME: financeacrignat
+  ACR_LOGIN_SERVER: financeacrignat.azurecr.io
+  IMAGE_NAME: finance-webapp
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          # Provide a Service Principal JSON in repo secret AZURE_CREDENTIALS
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Enable Web App Managed Identity and grant AcrPull
+        run: |
+          set -e
+          # Enable system-assigned identity on the Web App (idempotent)
+          az webapp identity assign -g $AZURE_RESOURCE_GROUP -n $AZURE_WEBAPP_NAME >/dev/null
+          PRINCIPAL_ID=$(az webapp identity show -g $AZURE_RESOURCE_GROUP -n $AZURE_WEBAPP_NAME --query principalId -o tsv)
+          ACR_ID=$(az acr show -n $ACR_NAME --query id -o tsv)
+          # Assign AcrPull if not already assigned
+          if ! az role assignment list --assignee $PRINCIPAL_ID --scope $ACR_ID --role AcrPull -o tsv | grep -q .; then
+            az role assignment create --assignee $PRINCIPAL_ID --role AcrPull --scope $ACR_ID >/dev/null
+          fi
+          # Force the web app to use Managed Identity for ACR pulls
+          SUB_ID=$(az account show --query id -o tsv)
+          az rest \
+            --method PATCH \
+            --headers '{"Content-Type":"application/json"}' \
+            --uri "https://management.azure.com/subscriptions/$SUB_ID/resourceGroups/$AZURE_RESOURCE_GROUP/providers/Microsoft.Web/sites/$AZURE_WEBAPP_NAME/config/web?api-version=2022-09-01" \
+            --body '{"properties":{"acrUseManagedIdentityCreds":true}}' >/dev/null
+          # Remove any legacy basic-auth registry creds from app settings
+          az webapp config appsettings delete \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --name $AZURE_WEBAPP_NAME \
+            --setting-names DOCKER_REGISTRY_SERVER_USERNAME DOCKER_REGISTRY_SERVER_PASSWORD || true
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name $ACR_NAME
+
+      - name: Set image tags
+        id: vars
+        run: |
+          echo "TAG_SHA=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "IMAGE_SHA=$ACR_LOGIN_SERVER/$IMAGE_NAME:${GITHUB_SHA}" >> $GITHUB_OUTPUT
+          echo "IMAGE_LATEST=$ACR_LOGIN_SERVER/$IMAGE_NAME:latest" >> $GITHUB_OUTPUT
+
+      - name: Build and push (SHA tag)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.IMAGE_SHA }}
+            ${{ steps.vars.outputs.IMAGE_LATEST }}
+
+      - name: Point Web App to new image
+        run: |
+          az webapp config container set \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --name $AZURE_WEBAPP_NAME \
+            --container-image-name ${{ steps.vars.outputs.IMAGE_SHA }}
+
+
+      - name: Restart Web App
+        run: az webapp restart -g $AZURE_RESOURCE_GROUP -n $AZURE_WEBAPP_NAME
+
+      - name: Verify
+        run: |
+          echo "Deployed image: ${{ steps.vars.outputs.IMAGE_SHA }}"
+          echo "Web App: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          # Optional health check
+          for i in {1..15}; do curl -fsS https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net && break || sleep 10; done
+          {
+            echo "## Deployment Summary";
+            echo "- Deployed image: ${{ steps.vars.outputs.IMAGE_SHA }}";
+            echo "- Web App: https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net";
+            echo "- Resource Group: $AZURE_RESOURCE_GROUP";
+          } >> "$GITHUB_STEP_SUMMARY"

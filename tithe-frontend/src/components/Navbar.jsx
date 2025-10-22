@@ -17,7 +17,8 @@ export default function Navbar() {
           <NavLink to="/pricing" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Pricing</NavLink>
           <NavLink to="/about" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>About</NavLink>
           <NavLink to="/integrations" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Integrations</NavLink>
-          <NavLink to="/dashboard" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Dashboard</NavLink>
+          <NavLink to="/user-dashboard" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>User Dashboard</NavLink>
+          <NavLink to="/team-management" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Team Management</NavLink>
         </nav>
         <nav className="flex items-center gap-2">
           {!loggedIn ? (
@@ -36,9 +37,9 @@ export default function Navbar() {
             <>
               <Link
                 className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                to="/dashboard"
+                to="/user-dashboard"
               >
-                Dashboard
+                User Dashboard
               </Link>
               <button
                 onClick={() => {

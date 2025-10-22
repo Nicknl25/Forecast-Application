@@ -21,4 +21,13 @@ export const loginUser = (data) => api.post("/api/users/login", data);
 export const getCurrentUser = () => api.get("/api/users/me");
 export const getQBAuthUrl = () => api.get("/api/qb/connect");
 
+// Company / User Dashboard APIs
+export const getCompanyInfo = () => api.get("/api/company/info");
+export const getCompanyUsers = () => api.get("/api/company/users");
+export const addCompanyUser = (payload) => api.post("/api/company/users", payload);
+export const deleteCompanyUser = (userId) => api.delete(`/api/company/users/${userId}`);
+export const updateCompanyUser = (userId, payload) => api.patch(`/api/company/users/${userId}`, payload);
+export const updateCompanySettings = (payload) => api.patch("/api/company/settings", payload);
+export const getAuditLog = (params = {}) => api.get("/api/company/audit-log", { params });
+
 export default api;

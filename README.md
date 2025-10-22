@@ -1,6 +1,9 @@
 # Finance Functions — Web App and Function App Split
 
+[![Deploy Container to Azure Web App](https://github.com/Nicknl25/Forecast-Application/actions/workflows/deploy-container.yml/badge.svg?branch=main)](https://github.com/Nicknl25/Forecast-Application/actions/workflows/deploy-container.yml)
+
 This repository is split between:
+<!-- chore: trigger redeploy for scheduler verification -->
 
 - Azure Web App (HTTP endpoints)
 - Azure Function App (timers only)
@@ -138,39 +141,16 @@ zip -r functionapp.zip .
 az functionapp deployment source config-zip -g $RG -n $FUNCAPP_NAME --src functionapp.zip
 ```
 
-## Deploy via .env and script
+## Automated Container Deployment
 
-Quick path using a Bash script that reads settings from a `.env` file:
+This repository auto-builds and deploys the Docker image to Azure Web App on every push to `main` via GitHub Actions.
 
-1) Copy the example file and edit your values
-```
-cp .env.example .env
-```
+- Workflow: `.github/workflows/deploy-container.yml`
+- Registry: `financeacrignat.azurecr.io`
+- Web App: `finance-webapp-test` (resource group `finance-rg`)
 
-2) Run the deployment script (in Azure Cloud Shell, WSL, or any Bash shell with Azure CLI installed)
-```
-bash scripts/deploy.sh
-```
+To enable:
+- Add repository secret `AZURE_CREDENTIALS` (Service Principal JSON with ACR push + Web App manage permissions).
+- Optionally add `ACR_USERNAME` and `ACR_PASSWORD` if you prefer explicit pull credentials; otherwise the workflow enables ACR admin and configures pull automatically.
 
-Env vars in `.env` control resource names, locations, and app settings. The script will:
-- Create/Update the resource group, plan, Web App, and Function App
-- Configure required app settings for both apps
-- Deploy the repo to the Web App (zip deploy)
-- Create a zip and deploy to the Function App (timers)
-
-### PowerShell alternative
-
-If you prefer Azure PowerShell, a reusable script is provided:
-
-```
-# Edit parameters or pass via -Param value
-powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 `
-  -ResourceGroup "your-rg" -Location "eastus" -Plan "your-linux-plan" `
-  -WebAppName "your-webapp-name" -FuncAppName "your-funcapp-name" -StorageAccount "yourfuncstoracct" `
-  -QB_CLIENT_ID "<intuit-client-id>" -QB_CLIENT_SECRET "<intuit-client-secret>" `
-  -ENCRYPTION_SECRET "<fernet-key>" `
-  -SQL_SERVER "<server>" -SQL_DB "<db>" -SQL_USER "<user>" -SQL_PASSWORD "<password>" `
-  -TEST_FUNCTION_KEY "<shared-key>"
-```
-
-Prereqs: `Install-Module Az -Scope CurrentUser`, then `Connect-AzAccount`.
+The workflow summary includes the “Deployed image SHA.” You can also view deployment status via the badge near the top of this README.
