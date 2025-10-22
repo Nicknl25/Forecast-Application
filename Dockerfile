@@ -32,6 +32,7 @@ EXPOSE 8000
 
 # Default command: run Flask app via Gunicorn
 COPY start.sh /start.sh
-RUN chmod +x /start.sh
+RUN sed -i 's/\r$//' /start.sh && chmod +x /start.sh
 CMD ["/start.sh"]
+
 

@@ -1,13 +1,14 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-echo "[entrypoint] container boot at FT07:04:41Z"
+echo "[entrypoint] container boot at FT07:15:22Z"
 python - <<'PY'
 try:
     import gunicorn
-    print(f"[entrypoint] gunicorn {getattr(gunicorn, '__version__', 'unknown')}")
-except Exception:
-    print("[entrypoint] gunicorn version unknown")
+    ver = getattr(gunicorn, '__version__', 'unknown')
+    print(f"[entrypoint] gunicorn {ver}")
+except Exception as e:
+    print(f"[entrypoint] gunicorn version lookup failed: {e}")
 PY
 
 export PYTHONUNBUFFERED=1
