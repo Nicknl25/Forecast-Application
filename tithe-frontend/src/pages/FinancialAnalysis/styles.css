@@ -1,24 +1,35 @@
-.fa-grid {
+/* Financial Analysis full-page grid layout */
+.fa-container {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  grid-template-rows: 1fr;
-  height: calc(100vh - 120px); /* fills between navbar and footer */
-  background-color: #fff;
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+  grid-template-columns: 200px 1fr 1fr; /* Keep column widths as they are */
+  grid-template-rows: auto 1fr auto;    /* Sidebar and main take most space */
+  gap: 10px;
+  padding: 10px;
+  height: 100vh;                        /* Fill full viewport height */
+  background: #ffffff;
+}
+
+.fa-header {
+  grid-area: header;
+  background: #ffffff; /* Navbar has its own border/background */
 }
 
 .fa-sidebar {
-  background-color: #f8f9fa;
+  grid-area: sidebar;
+  background-color: #f8f9fa;            /* light gray */
   border-right: 1px solid #e0e0e0;
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  padding: 20px;
+  overflow-y: auto;                     /* Scroll if content grows */
 }
 
 .fa-title {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   color: #333;
 }
 
@@ -28,21 +39,29 @@
   text-decoration: none;
   padding: 10px 12px;
   border-radius: 4px;
-  margin-bottom: 4px;
-  transition: all 0.2s;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
 }
 
 .fa-links a:hover {
-  background-color: #e8f0fe;
+  background-color: #e8f0fe;            /* blue-tinted hover */
   color: #0d6efd;
 }
 
 .fa-links .active {
-  background-color: #0d6efd;
+  background-color: #0d6efd;            /* active blue */
   color: #fff;
 }
 
 .fa-main {
-  padding: 24px;
-  overflow-y: auto;
+  grid-area: main;
+  background-color: #ffffff;
+  padding: 20px;
+  overflow-y: auto;                      /* Scroll if content grows */
 }
+
+.fa-footer {
+  grid-area: footer;
+  background-color: #ffffff;             /* Footer component has border */
+}
+

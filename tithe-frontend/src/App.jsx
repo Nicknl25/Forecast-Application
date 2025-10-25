@@ -32,6 +32,22 @@ function Layout() {
 export default function App() {
   return (
     <Routes>
+      {/* Financial Analysis uses its own full-page grid (includes Navbar/Footer) */}
+      <Route
+        path="/financial-analysis"
+        element={
+          <ProtectedRoute>
+            <FinancialAnalysis />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<FinancialAnalysisDashboard />} />
+        <Route path="sheets" element={<Sheets />} />
+        <Route path="forecast-drivers" element={<ForecastDrivers />} />
+      </Route>
+
+      {/* Default app layout for all other routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/pricing" element={<Pricing />} />
@@ -47,19 +63,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/financial-analysis"
-          element={
-            <ProtectedRoute>
-              <FinancialAnalysis />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<FinancialAnalysisDashboard />} />
-          <Route path="sheets" element={<Sheets />} />
-          <Route path="forecast-drivers" element={<ForecastDrivers />} />
-        </Route>
         <Route
           path="/user-dashboard"
           element={
