@@ -98,7 +98,14 @@ def send_sync_report(logger, results):
         return
 
     df = pd.DataFrame(results)
-    file_name = f"/tmp/sync_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    # Ensure a valid, existing temp directory on Linux containers
+    tmp_dir = "/tmp" if os.name != "nt" else (os.getenv("TEMP") or os.getenv("TMP") or ".")
+    try:
+        os.makedirs(tmp_dir, exist_ok=True)
+    except Exception:
+        # Best-effort; fall back to current directory
+        tmp_dir = "."
+    file_name = os.path.join(tmp_dir, f"sync_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx")
     df.to_excel(file_name, index=False)
 
     client_summary = (

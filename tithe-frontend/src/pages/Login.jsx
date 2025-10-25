@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import api, { loginUser } from '../api/api'
+import api, { loginUser, getCurrentUser } from '../api/api'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -18,8 +18,13 @@ export default function Login() {
       const token = res?.data?.token
       if (token) {
         localStorage.setItem('token', token)
-        // Ensure subsequent requests immediately include the token
         api.defaults.headers.common.Authorization = `Bearer ${token}`
+        // Fetch admin flag for UI gating
+        try {
+          const me = await getCurrentUser()
+          const isAdmin = !!me?.data?.is_admin
+          localStorage.setItem('is_admin', isAdmin ? '1' : '0')
+        } catch {}
         alert('Welcome back')
         navigate(from, { replace: true })
       } else {

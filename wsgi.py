@@ -8,10 +8,14 @@ try:
     from qb_app.routes_auth import auth_bp
     from qb_app.routes_qb_connect import qb_connect_bp
     from qb_app.routes_user_dashboard import user_dashboard_bp
+    from qb_app.admin_routes import admin_bp
+    from qb_app.routes_integrations import integrations_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(qb_connect_bp)
     app.register_blueprint(user_dashboard_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(integrations_bp)
 except Exception as e:  # avoid crashing import if optional
     # You can remove this try/except in production once stable
     print(f"Blueprint registration warning: {e}")

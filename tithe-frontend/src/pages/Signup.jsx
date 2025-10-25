@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { registerUser } from '../api/api'
 
 export default function Signup() {
@@ -7,13 +7,16 @@ export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const onSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
       await registerUser({ company_name: companyName, email, password })
-      alert('Account created')
+      alert('Account created. Please log in to continue.')
+      // Redirect to login; onboarding check runs after login
+      navigate('/login', { replace: true })
     } catch (err) {
       const status = err?.response?.status
       const msg = err?.response?.data?.error || 'Registration failed'
@@ -50,4 +53,3 @@ export default function Signup() {
     </div>
   )
 }
-

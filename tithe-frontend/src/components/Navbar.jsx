@@ -1,10 +1,27 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import api from '../api/api'
+import api, { getCurrentUser } from '../api/api'
+import { useEffect, useState } from 'react'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const token = localStorage.getItem('token')
   const loggedIn = !!token
+  const [isAdmin, setIsAdmin] = useState(() => (localStorage.getItem('is_admin') === '1' || localStorage.getItem('is_admin') === 'true'))
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      if (!loggedIn) return
+      try {
+        const res = await getCurrentUser()
+        const flag = !!res?.data?.is_admin
+        localStorage.setItem('is_admin', flag ? '1' : '0')
+        if (!cancelled) setIsAdmin(flag)
+      } catch {}
+    }
+    load()
+    return () => { cancelled = true }
+  }, [loggedIn])
 
   return (
     <header className="border-b bg-white">
@@ -17,8 +34,12 @@ export default function Navbar() {
           <NavLink to="/pricing" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Pricing</NavLink>
           <NavLink to="/about" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>About</NavLink>
           <NavLink to="/integrations" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Integrations</NavLink>
+          <NavLink to="/financial-analysis" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Financial Analysis</NavLink>
           <NavLink to="/user-dashboard" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>User Dashboard</NavLink>
           <NavLink to="/team-management" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Team Management</NavLink>
+          {loggedIn && isAdmin && (
+            <NavLink to="/admin-dashboard" className={({ isActive }) => `rounded-md px-3 py-2 text-sm ${isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'}`}>Admin</NavLink>
+          )}
         </nav>
         <nav className="flex items-center gap-2">
           {!loggedIn ? (
@@ -44,6 +65,7 @@ export default function Navbar() {
               <button
                 onClick={() => {
                   localStorage.removeItem('token')
+                  localStorage.removeItem('is_admin')
                   delete api.defaults.headers.common.Authorization
                   navigate('/')
                 }}

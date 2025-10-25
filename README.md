@@ -30,6 +30,7 @@ The Web App hosts all HTTP routes via Flask/Gunicorn. The Function App runs only
   - Crypto: `ENCRYPTION_SECRET` (Fernet key)
   - SQL: `SQL_SERVER`, `SQL_DB`, `SQL_USER`, `SQL_PASSWORD`
   - Triggers/ops: `APP_BASE_URL` (this Web App base URL), `TEST_FUNCTION_KEY` (shared key for protected routes)
+  - Container routing: `WEBSITES_PORT=8000` (must match Gunicorn bind)
 - Redirect URI in your Intuit app should be:
   - `<WebAppBase>/api/qb/oauth/callback`
 
@@ -157,3 +158,22 @@ The workflow summary includes the “Deployed image SHA.” You can also view de
 <!-- chore: re-run deploy after adding AZURE_CREDENTIALS -->
 <!-- chore: re-run deploy -->
 <!-- chore: trigger redeploy: force workflow to rebuild image with /bin/sh entrypoint -->
+
+## Trigger Scheduler Jobs via SSH (Debugging)
+
+Use SSH into the main app container (not Kudu/Console) to manually trigger APScheduler jobs and observe output in Azure Log Stream.
+
+Azure Portal:
+- App Service → Development Tools → SSH (this opens the main container)
+- Run:
+  - `python -c "from qb_app import scheduler; scheduler.job_token_refresh()"`
+  - or: `python -c "from qb_app import scheduler; scheduler.job_daily_sync()"`
+  - If `python` is not found, try `python3`.
+
+Azure CLI:
+- `az webapp ssh -g finance-rg -n finance-webapp-test`
+- Then run the same `python -c ...` commands above.
+
+Notes:
+- The Kudu/Console shell is a sidecar and typically does not have Python; use SSH instead.
+- Keep Azure Portal → Log Stream open to watch real‑time logs (STDOUT).

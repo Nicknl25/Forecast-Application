@@ -367,21 +367,45 @@ def me():
     try:
         conn = get_connection()
         cur = conn.cursor()
+        # Fetch core user fields (do not alter users schema here)
         cur.execute("SELECT id, email, company_name FROM users WHERE id = ?", (uid,))
-        row = fetchone_dict(cur)
-        conn.close()
-        if not row:
+        user_row = fetchone_dict(cur)
+        if not user_row:
+            conn.close()
             return jsonify({"error": "User not found"}), 404
-        user = row
+
+        # Determine admin flag from app_admins table by email
+        email = (user_row.get("email") or "").strip().lower()
+        is_admin_flag = False
+        if email:
+            try:
+                cur.execute(
+                    """
+                    IF OBJECT_ID('dbo.app_admins','U') IS NULL
+                        SELECT 0
+                    ELSE
+                        SELECT CASE WHEN EXISTS (
+                          SELECT 1 FROM app_admins WHERE LOWER(email) = LOWER(?)
+                        ) THEN 1 ELSE 0 END
+                    """,
+                    (email,),
+                )
+                r = cur.fetchone()
+                is_admin_flag = bool(r[0]) if r and r[0] is not None else False
+            except Exception:
+                is_admin_flag = False
+        conn.close()
+
+        return jsonify(
+            {
+                "user_id": int(user_row["id"]),
+                "email": user_row["email"],
+                "company_name": user_row["company_name"],
+                "is_admin": bool(is_admin_flag),
+            }
+        )
     except Exception as e:
         return jsonify({"error": f"Lookup failed: {e}"}), 500
-    return jsonify(
-        {
-            "user_id": int(user["id"]),
-            "email": user["email"],
-            "company_name": user["company_name"],
-        }
-    )
 
 # Optional route aliases to support legacy frontend paths
 @app.post("/api/auth/login")

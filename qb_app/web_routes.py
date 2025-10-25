@@ -1,10 +1,10 @@
-import os
+﻿import os
 import io
 import sys
 import inspect
 import importlib
 import socket
-from flask import request, jsonify
+from flask import request, jsonify, send_from_directory
 
 from qb_app.qb_callback_app import app, log
 from qb_app.db import get_connection
@@ -183,3 +183,42 @@ def db_diag():
     results["pyodbc_connect_trust_yes"] = _conn_result(True)
 
     return jsonify(results)
+
+
+# Payment webhooks (placeholders for future integrations)
+@app.post("/api/webhook/stripe")
+def stripe_webhook():
+    try:
+        # TODO: verify signature using STRIPE_WEBHOOK_SECRET
+        return ("", 204)
+    except Exception as e:
+        return (str(e), 400)
+
+
+@app.post("/api/webhook/paypal")
+def paypal_webhook():
+    try:
+        # TODO: verify payload using PAYPAL_WEBHOOK_ID
+        return ("", 204)
+    except Exception as e:
+        return (str(e), 400)
+
+
+# Serve the React Admin Dashboard (built assets in tithe-frontend/dist)
+@app.get("/admin-dashboard")
+def admin_dashboard_spa():
+    try:
+        return send_from_directory("tithe-frontend/dist", "index.html")
+    except Exception as e:
+        return (f"Admin dashboard not found: {e}", 404)
+
+
+@app.get("/assets/<path:filename>")
+def admin_assets(filename: str):
+    try:
+        return send_from_directory("tithe-frontend/dist/assets", filename)
+    except Exception as e:
+        return (f"Asset not found: {e}", 404)
+
+
+

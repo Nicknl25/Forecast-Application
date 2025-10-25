@@ -1,3 +1,14 @@
+FROM node:20-bullseye-slim AS frontend-builder
+
+WORKDIR /app/tithe-frontend
+
+# Install frontend deps and build Vite app
+COPY tithe-frontend/package*.json ./
+RUN npm ci
+COPY tithe-frontend .
+RUN npm run build
+
+
 FROM python:3.11-slim
 
 # Avoid prompts and bytecode
@@ -27,12 +38,15 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy application code
 COPY . /app
 
+# Copy built frontend assets from builder stage
+COPY --from=frontend-builder /app/tithe-frontend/dist /app/tithe-frontend/dist
+
 # Gunicorn port
 EXPOSE 8000
 
 # Default command: run Flask app via Gunicorn
 COPY start.sh /start.sh
 RUN sed -i 's/\r$//' /start.sh && chmod +x /start.sh
-CMD ["/start.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-", "wsgi:app"]
 
 

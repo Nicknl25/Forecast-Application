@@ -185,15 +185,9 @@ def qb_callback():
             conn.commit()
             conn.close()
 
-            # Queue onboarding for existing client (async)
-            try:
-                submit_onboarding(client_id_existing, logger=log)
-                log("Onboarding queued (existing client).")
-            except Exception as e:
-                log(f"Onboarding enqueue error (existing client): {e}")
-
-            log("Existing client updated successfully.")
-            return "QuickBooks connection refreshed successfully! Initial data load started automatically."
+            # Do not auto-start onboarding; user must trigger from Integrations
+            log("Existing client updated successfully. Onboarding not auto-started.")
+            return "QuickBooks connection refreshed. Start onboarding from Integrations."
 
         # Otherwise, new client
         log("Fetching company info for new client...")
@@ -264,14 +258,8 @@ def qb_callback():
         log(msg)
         return msg, 500
 
-    # 5) Queue onboarding automatically (background job)
-    try:
-        submit_onboarding(new_client_id, logger=log)
-        log("Onboarding queued (new client).")
-    except Exception as e:
-        log(f"Could not enqueue onboarding automatically: {e}")
-
-    log("=== CALLBACK COMPLETED SUCCESSFULLY ===")
+    # Do not auto-start onboarding; user must trigger from Integrations
+    log("=== CALLBACK COMPLETED SUCCESSFULLY (onboarding not auto-started) ===")
     # Try to redirect back to dashboard if FRONTEND_DASHBOARD_URL is set
     try:
         dash = os.getenv("FRONTEND_DASHBOARD_URL")
@@ -281,7 +269,7 @@ def qb_callback():
         pass
     return (
         f"QuickBooks connected successfully for client {new_client_id}! "
-        f"Initial data load started automatically. You can close this window."
+        f"Start onboarding from Integrations. You can close this window."
     )
 
 
